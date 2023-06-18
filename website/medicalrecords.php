@@ -1,4 +1,5 @@
 <?php
+  ob_start();
   include('session_handler.php');
   checker();
 ?>
@@ -196,11 +197,21 @@ table th {
             <th>Diagnosis</th>
             <th>Medication</th>
             <th>Notes</th>
+            <th>Operation</th>
           </tr>
         </thead>
         <tbody>
         <?php 
         include("database.php");
+        
+        if(isset($_GET['id'])){
+          $id = $_GET['id'];
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=0");
+          $delete = mysqli_query($conn,"DELETE FROM `medical_records` WHERE `recordID` = '$id'");
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=1");
+          header("medicalrecords.php");
+        } 
+
         $sql = "SELECT recordID,medical_records.patientID,medical_records.doctorID,CONCAT(patients.first_name,' ',patients.last_name) AS Patient_Name,CONCAT(doctors.first_name,' ',doctors.last_name) AS Doctor_Name,date,diagnosis,medication,notes
         FROM medical_records
         INNER JOIN patients ON patients.patientID = medical_records.patientID
@@ -209,13 +220,26 @@ table th {
         $result = mysqli_query($conn,$sql);
         if($result-> num_rows > 0){
           while($row = $result -> fetch_assoc()){
-            echo "<tr><td>".$row["recordID"]."</td>"."<td>".$row["patientID"]."</td>"."<td>".$row["doctorID"]."</td>"."<td>".$row["Patient_Name"]."</td>"."<td>".$row["Doctor_Name"]."</td>"."<td>".$row["date"]."</td>"."<td>".$row["diagnosis"]."</td>"."<td>".$row["medication"]."</td>"."<td>".$row["notes"]."</td></tr>";
+            echo "<tr>
+            <td>".$row["recordID"]."</td>"
+            ."<td>".$row["patientID"]."</td>"
+            ."<td>".$row["doctorID"]."</td>"
+            ."<td>".$row["Patient_Name"]."</td>"
+            ."<td>".$row["Doctor_Name"]."</td>"
+            ."<td>".$row["date"]."</td>"
+            ."<td>".$row["diagnosis"]."</td>"
+            ."<td>".$row["medication"]."</td>"
+            ."<td>".$row["notes"]
+            ."<td>"
+            ."<a href='medicalrecords.php?id=".$row["recordID"]."'class ='btn'>Delete</a>"
+            ."</td></tr>";
           }
           echo "</table>";
         }
         else{
           echo "0 result";
         }
+        ob_end_flush();
         ?>
       </tbody>
       </table>

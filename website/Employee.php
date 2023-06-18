@@ -1,4 +1,5 @@
 <?php
+  ob_start();
   include('session_handler.php');
   checker();
 ?>
@@ -181,24 +182,44 @@ table td {
             <th>Last Name</th>
             <th>Employee Position</th>
             <th>Department</th>
+            <th>Operation</th>
           </tr>
         </thead>
         <tbody>
         <?php 
         include("database.php");
+
+        if(isset($_GET['id'])){
+          $id = $_GET['id'];
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=0");
+          $delete = mysqli_query($conn,"DELETE FROM `employees` WHERE `EmployeeID` = '$id'");
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=1");
+          header("Employee.php");
+        } 
+
+
         $sql = "SELECT EmployeeID,first_name,last_name,position,department.department_name AS Department_Name
         FROM employees 
         INNER JOIN department ON department.departmentID = employees.departmentID";
         $result = mysqli_query($conn,$sql);
         if($result-> num_rows > 0){
           while($row = $result -> fetch_assoc()){
-            echo "<tr><td>".$row["EmployeeID"]."</td>"."<td>".$row["first_name"]."</td>"."<td>".$row["last_name"]."</td>"."<td>".$row["position"]."</td>"."<td>".$row["Department_Name"]."</td></tr>";
+            echo "<tr>
+            <td>".$row["EmployeeID"]."</td>"
+            ."<td>".$row["first_name"]."</td>"
+            ."<td>".$row["last_name"]."</td>"
+            ."<td>".$row["position"]."</td>"
+            ."<td>".$row["Department_Name"]
+            ."<td>"
+            ."<a href='Employee.php?id=".$row["EmployeeID"]."'class ='btn'>Delete</a>"
+            ."</td></tr>";
           }
           echo "</table>";
         }
         else{
           echo "0 result";
         }
+        ob_end_flush();
         ?>
         </tbody>
       </table>

@@ -1,4 +1,5 @@
 <?php
+  ob_start();
   include('session_handler.php');
   checker();
 ?>
@@ -181,22 +182,39 @@ table td {
             <th>Department ID</th>
             <th>Department Name</th>
             <th>Description</th>
+            <th>Operation</th>
           </tr>
         </thead>
         <tbody>
         <?php 
         include("database.php");
+
+        if(isset($_GET['id'])){
+          $id = $_GET['id'];
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=0");
+          $delete = mysqli_query($conn,"DELETE FROM `department` WHERE `departmentID` = '$id'");
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=1");
+          header("department.php");
+        }
+
         $sql = "SELECT * FROM department";
         $result = mysqli_query($conn,$sql);
         if($result-> num_rows > 0){
           while($row = $result -> fetch_assoc()){
-            echo "<tr><td>".$row["departmentID"]."</td>"."<td>".$row["department_name"]."</td>"."<td>".$row["description"]."</td></tr>";
+            echo "<tr>
+            <td>".$row["departmentID"]."</td>"
+            ."<td>".$row["department_name"]."</td>"
+            ."<td>".$row["description"]
+            ."<td>"
+            ."<a href='department.php?id=".$row["departmentID"]."'class ='btn'>Delete</a>"
+            ."</td></tr>";
           }
           echo "</table>";
         }
         else{
           echo "0 result";
         }
+        ob_end_flush();
         ?>
         </tbody>
       </table>

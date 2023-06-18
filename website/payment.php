@@ -1,4 +1,5 @@
 <?php
+  ob_start();
   include('session_handler.php');
   checker();
 ?>
@@ -183,11 +184,21 @@ table td {
             <th>Amount</th>
             <th>Payment Date</th>
             <th>Payment Method</th>
+            <th>Operation</th>
           </tr>
         </thead>
         <tbody>
         <?php 
         include("database.php");
+
+        if(isset($_GET['id'])){
+          $id = $_GET['id'];
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=0");
+          $delete = mysqli_query($conn,"DELETE FROM `payments` WHERE `paymentID` = '$id'");
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=1");
+          header("payment.php");
+        } 
+
         $sql = "SELECT paymentID,payments.patientID,CONCAT(patients.first_name,' ',patients.last_name) AS Patient_Name,amount,payment_date,payment_method
         FROM payments
         INNER JOIN patients 
@@ -195,13 +206,23 @@ table td {
         $result = mysqli_query($conn,$sql);
         if($result-> num_rows > 0){
           while($row = $result -> fetch_assoc()){
-            echo "<tr><td>".$row["paymentID"]."</td>"."<td>".$row["patientID"]."</td>"."<td>".$row["Patient_Name"]."</td>"."<td>".$row["amount"]."</td>"."<td>".$row["payment_date"]."</td>"."<td>".$row["payment_method"]."</td></tr>";
+            echo "<tr>
+            <td>".$row["paymentID"]."</td>"
+            ."<td>".$row["patientID"]."</td>"
+            ."<td>".$row["Patient_Name"]."</td>"
+            ."<td>".$row["amount"]."</td>"
+            ."<td>".$row["payment_date"]."</td>"
+            ."<td>".$row["payment_method"]
+            ."<td>"
+            ."<a href='payment.php?id=".$row["paymentID"]."'class ='btn'>Delete</a>"
+            ."</td></tr>";
           }
           echo "</table>";
         }
         else{
           echo "0 result";
         }
+        ob_end_flush();
         ?>
         </tbody>
       </table>

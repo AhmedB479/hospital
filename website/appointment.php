@@ -1,4 +1,5 @@
-<?php
+<?php  
+  ob_start();
   include('session_handler.php');
   checker();
 ?>
@@ -180,13 +181,22 @@ table td {
             <th>Patient Name</th>
             <th>Date</th>
             <th>Time</th>
-            <th>Status</th>
+            <th>Status</th>         
+            <th>Operation</th>
           </tr>
         </thead>
         <tbody>
         <?php 
         include("database.php");
         
+        if(isset($_GET['id'])){
+          $id = $_GET['id'];
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=0");
+          $delete = mysqli_query($conn,"DELETE FROM `appointment` WHERE `appointmentID` = '$id'");
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=1");
+          header("appointment.php");
+        } 
+
         $sql = 
         "SELECT appointmentID,CONCAT(patients.first_name,' ',patients.last_name) AS Patient_Name,CONCAT(doctors.first_name,' ',doctors.last_name) AS Doctor_Name,appointment_date,appointment_time,state 
         FROM appointment 
@@ -196,13 +206,23 @@ table td {
         $result = mysqli_query($conn,$sql);
         if($result-> num_rows > 0){
           while($row = $result -> fetch_assoc()){
-            echo "<tr><td>".$row["appointmentID"]."</td>"."<td>".$row["Doctor_Name"]."</td>"."<td>".$row["Patient_Name"]."</td>"."<td>".$row["appointment_date"]."</td>"."<td>".$row["appointment_time"]."</td>"."<td>".$row["state"]."</td></tr>";
+            echo "<tr>
+            <td>".$row["appointmentID"]."</td>"
+            ."<td>".$row["Doctor_Name"]."</td>"
+            ."<td>".$row["Patient_Name"]."</td>"
+            ."<td>".$row["appointment_date"]."</td>"
+            ."<td>".$row["appointment_time"]."</td>"
+            ."<td>".$row["state"]."</td>"
+            ."<td>"
+            ."<a href='appointment.php?id=".$row["appointmentID"]."'class ='btn'>Delete</a>"
+            ."</td></tr>";
           }
           echo "</table>";
         }
         else{
           echo "0 result";
         }
+        ob_end_flush();
         ?>
         </tbody>
       </table>

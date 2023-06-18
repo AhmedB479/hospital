@@ -1,4 +1,5 @@
 <?php
+  ob_start();
   include('session_handler.php');
   checker();
 ?>
@@ -182,22 +183,42 @@ table td {
           <th>Specialization</th>
           <th>Contact Number</th>
           <th>Email</th>
+          <th>Operation</th>
         </tr>
       </thead>
       <tbody>
         <?php 
         include("database.php");
+        
+        if(isset($_GET['id'])){
+          $id = $_GET['id'];
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=0");
+          $delete = mysqli_query($conn,"DELETE FROM `doctors` WHERE `doctorID` = '$id'");
+          mysqli_query($conn,"SET FOREIGN_KEY_CHECKS=1");
+          header("doctor.php");
+        } 
+
         $sql = "SELECT * FROM doctors";
         $result = mysqli_query($conn,$sql);
         if($result-> num_rows > 0){
           while($row = $result -> fetch_assoc()){
-            echo "<tr><td>".$row["doctorID"]."</td>"."<td>".$row["first_name"]."</td>"."<td>".$row["last_name"]."</td>"."<td>".$row["specialization"]."</td>"."<td>".$row["contact_number"]."</td>"."<td>".$row["email"]."</td></tr>";
+            echo "<tr>
+            <td>".$row["doctorID"]."</td>"
+            ."<td>".$row["first_name"]."</td>"
+            ."<td>".$row["last_name"]."</td>"
+            ."<td>".$row["specialization"]."</td>"
+            ."<td>".$row["contact_number"]."</td>"
+            ."<td>".$row["email"]
+            ."<td>"
+            ."<a href='doctor.php?id=".$row["doctorID"]."'class ='btn'>Delete</a>"
+            ."</td></tr>";
           }
           echo "</table>";
         }
         else{
           echo "0 result";
         }
+        ob_flush();
         ?>
       </tbody>
     </table>
